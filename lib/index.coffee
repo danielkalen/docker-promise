@@ -57,5 +57,17 @@ exports.imageSearch = (options)-> request "/images/search", options
 exports.imagePrune = (options)-> request "/images/search", extend({method:'post'}, options)
 
 
+## ==========================================================================
+## events
+## ========================================================================== 
+exports.events = (options, cb)->
+	if typeof options is 'function'
+		cb = options
+		options = null
+	
+	streamRequest("/events", options)
+		.on 'data', (chunk)->
+			data = try JSON.parse(chunk.toString())
+			cb?(data) if data
 
 
