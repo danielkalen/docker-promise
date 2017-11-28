@@ -26,10 +26,9 @@ exports.containers = (options)-> request "/containers/json", options
 exports.containerCreate = (options)-> request "/containers/create", options
 exports.containerInspect = (id, options)-> request "/containers/#{id}/json", options
 exports.containerStats = (id, options)-> request "/containers/#{id}/stats", extend({query:stream:false}, options)
-exports.containerStatsStream = (id, options)-> streamRequest "/containers/#{id}/stats", options
 exports.containerProcesses = (id, options)-> request "/containers/#{id}/top", options
-exports.containerLogs = (id, options)-> streamRequest "/containers/#{id}/logs", extend({follow:true}, options)
 exports.containerResize = (id, options)-> request "/containers/#{id}/resize", extend({method:'post'}, options)
+exports.containerLogs = (id, options)-> request "/containers/#{id}/logs", extend(json:false, query:{stdout:true, stderr:true}, options)
 exports.containerStart = (id, options)-> request "/containers/#{id}/start", extend({method:'post'}, options)
 exports.containerStop = (id, options)-> request "/containers/#{id}/stop", extend({method:'post'}, options)
 exports.containerRestart = (id, options)-> request "/containers/#{id}/restart", extend({method:'post'}, options)
@@ -58,7 +57,7 @@ exports.imagePrune = (options)-> request "/images/search", extend({method:'post'
 
 
 ## ==========================================================================
-## events
+## streams
 ## ========================================================================== 
 exports.events = (options, cb)->
 	if typeof options is 'function'
@@ -68,6 +67,27 @@ exports.events = (options, cb)->
 	streamRequest("/events", options)
 		.on 'data', (chunk)->
 			data = try JSON.parse(chunk.toString())
+			cb?(data) if data
+
+exports.stats = (target, options, cb)->
+	if typeof options is 'function'
+		cb = options
+		options = null
+	
+	streamRequest("/containers/#{target}/stats", options)
+		.on 'data', (chunk)->
+			data = try JSON.parse(chunk.toString())
+			cb?(data) if data
+
+exports.logs = (target, options, cb)->
+	if typeof options is 'function'
+		cb = options
+		options = null
+	
+	options = extend({query:{stdout:true, stderr:true, follow:true}}, options)
+	streamRequest("/containers/#{target}/logs", options)
+		.on 'data', (chunk)->
+			data = try chunk.toString()
 			cb?(data) if data
 
 
