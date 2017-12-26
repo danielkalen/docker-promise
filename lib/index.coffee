@@ -65,9 +65,9 @@ exports.events = (options, cb)->
 		options = null
 	
 	streamRequest("/events", options)
-		.on 'data', (chunk)->
+		.on 'data', (chunk)-> if cb?
 			data = try JSON.parse(chunk.toString())
-			cb?(data) if data
+			cb(data) if data
 
 exports.stats = (target, options, cb)->
 	if typeof options is 'function'
@@ -75,9 +75,9 @@ exports.stats = (target, options, cb)->
 		options = null
 	
 	streamRequest("/containers/#{target}/stats", options)
-		.on 'data', (chunk)->
+		.on 'data', (chunk)-> if cb?
 			data = try JSON.parse(chunk.toString())
-			cb?(data) if data
+			cb(data) if data
 
 exports.logs = (target, options, cb)->
 	if typeof options is 'function'
@@ -86,8 +86,8 @@ exports.logs = (target, options, cb)->
 	
 	options = extend({query:{stdout:true, stderr:true, follow:true}}, options)
 	streamRequest("/containers/#{target}/logs", options)
-		.on 'data', (chunk)->
+		.on 'data', (chunk)-> if cb?
 			data = try chunk.toString()
-			cb?(data) if data
+			cb(data) if data
 
 
