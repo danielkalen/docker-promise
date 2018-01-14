@@ -1,8 +1,7 @@
 Promise = require('bluebird').config warnings:false, longStackTraces:false
 extend = require 'extend'
 got = require 'got'
-DOCKER_SOCKET = process.env.DOCKER_SOCKET or '/var/run/docker.sock:'
-DOCKER_SOCKET = "http://unix:#{DOCKER_SOCKET}"
+DOCKER_API = process.env.DOCKER_API or "unix:/var/run/docker.sock:"
 
 
 exports.req = request = (path, options={})->
@@ -10,12 +9,12 @@ exports.req = request = (path, options={})->
 	options.json ?= true
 	
 	Promise.resolve()
-		.then ()-> got("#{DOCKER_SOCKET}/#{path}", options)._promise
+		.then ()-> got("#{DOCKER_API}/#{path}", options)._promise
 		.get 'body'
 
 exports.streamReq = streamRequest = (path, options={})->
 	path = path.slice(1) if path[0] is '/'
-	got.stream("#{DOCKER_SOCKET}/#{path}", options)
+	got.stream("#{DOCKER_API}/#{path}", options)
 
 
 
